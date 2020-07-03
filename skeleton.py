@@ -4,7 +4,6 @@ from viur.core import db, utils, conf, errors
 from viur.core.bones import baseBone, keyBone, dateBone, selectBone, relationalBone, stringBone
 from viur.core.bones.bone import ReadFromClientError, ReadFromClientErrorSeverity, getSystemInitialized
 from viur.core.tasks import CallableTask, CallableTaskBase, callDeferred
-from collections import OrderedDict
 from time import time
 import inspect, os, sys, logging, copy
 from typing import Union, Dict, List, Callable
@@ -276,6 +275,7 @@ class BaseSkeleton(object, metaclass=MetaBaseSkel):
 		"""
 		complete = True
 		skelValues.errors = []
+		errorsByKey = dict()
 
 		for key, _bone in skelValues.items():
 			if _bone.readOnly:
@@ -283,8 +283,14 @@ class BaseSkeleton(object, metaclass=MetaBaseSkel):
 			errors = _bone.fromClient(skelValues, key, data)
 			if errors:
 				skelValues.errors.extend(errors)
+				errorsByKey[key] = errors
+
+		# TODO: This is new for required expressions !!!
+		for key, _bone in skelValues.items():
+			errors = errorsByKey[key]
+			if errors:
 				for error in errors:
-					if (error.severity == ReadFromClientErrorSeverity.Empty and _bone.required) \
+					if (error.severity == ReadFromClientErrorSeverity.Empty and ((_bone.requiredAst and conf["saveEvalInterpreter"].execute(_bone.requiredAst, skelValues)) or _bone.required)) \
 						or error.severity == ReadFromClientErrorSeverity.Invalid:
 						complete = False
 		# FIXME!

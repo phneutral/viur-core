@@ -140,6 +140,6 @@ conf = {
 	"viur.tasks.customEnvironmentHandler": None,
 
 	# Will be set to server.__version__ in server.__init__
-	"viur.version": None,
+	"viur.version": None
 }
 

@@ -65,7 +65,9 @@ class baseBone(object):  # One Bone:
 			:type defaultValue: mixed
 			:param required: If True, the user must enter a valid value for this bone (the server refuses to save the
 				skeleton otherwise)
-			:type required: bool
+				If visible is of type str, this string should be a valid python expression which evaluates to a boolean
+				by safeeval.
+			:type required: bool|str
 			:param multiple: If True, multiple values can be given. (ie. n:m relations instead of n:1)
 			:type multiple: bool
 			:param searchable: If True, this bone will be included in the fulltext search. Can be used
@@ -83,7 +85,9 @@ class baseBone(object):  # One Bone:
 				protect the value from beeing exposed in a template, nor from being transferred to the
 				client (ie to the admin or as hidden-value in html-forms)
 				Again: This is just a hint. It cannot be used as a security precaution.
-			:type visible: bool
+				If visible is of type str, this string should be a valid python expression which evaluates to a boolean
+				by safeeval.
+			:type visible: bool|str
 
 			.. NOTE::
 				The kwarg 'multiple' is not supported by all bones
@@ -93,7 +97,14 @@ class baseBone(object):  # One Bone:
 		#	logging.warning("Indexed on bones is not supported anymore!")
 		self.isClonedInstance = getSystemInitialized()
 		self.descr = descr
-		self.required = required
+		self.required = False
+		self.requiredExpression = None
+		self.requiredAst = None
+		if isinstance(required, bool):
+			self.required = required
+		else:
+			self.requiredExpression = required
+			self.requiredAst = conf["safeEvalInterpreter"].compile(required)
 		self.params = params or {}
 		self.multiple = multiple
 		self.indexed = indexed
@@ -103,7 +114,12 @@ class baseBone(object):  # One Bone:
 		if vfunc:
 			self.isInvalid = vfunc
 		self.readOnly = readOnly
-		self.visible = visible
+		self.visible = True
+		self.visibleExpression = None
+		if isinstance(visible, bool):
+			self.visible = visible
+		else:
+			self.visibleExpression = visible
 		if unique:
 			if not isinstance(unique, UniqueValue):
 				raise ValueError("Unique must be an instance of UniqueValue")
