@@ -32,7 +32,7 @@ class MetaBaseSkel(type):
 	_skelCache = {}  # Mapping kindName -> SkelCls
 	_allSkelClasses = set()  # list of all known skeleton classes (including Ref and Mail-Skels)
 
-	__reservedKeywords_ = {"self", "cursor", "amount", "orderby", "orderdir",
+	__reservedKeywords_ = {"self", "cursor", "limit", "orderby", "orderdir",
 						   "style", "items", "keys", "values"}
 
 	def __init__(cls, name, bases, dct):

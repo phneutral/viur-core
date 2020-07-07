@@ -55,5 +55,5 @@ class ViurTagsSearchAdapter(CustomDatabaseAdapter):
 					resultEntryMap[entry.key] = entry
 		resultList = [(k, v) for k, v in resultScoreMap.items()]
 		resultList.sort(key=lambda x: x[1])
-		resList = [resultEntryMap[x[0]] for x in resultList[:databaseQuery.amount]]
+		resList = [resultEntryMap[x[0]] for x in resultList[:databaseQuery.limit]]
 		return resList

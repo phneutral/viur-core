@@ -27,7 +27,7 @@ class IndexMannager:
 		"""
 		:param pageSize: How many items per page
 		:type pageSize: int
-		:param maxPages: How many pages are build. Items become unreachable if the amount of items
+		:param maxPages: How many pages are build. Items become unreachable if the limit of items
 			exceed pageSize*maxPages (ie. if a forum-thread has more than pageSize*maxPages Posts, Posts
 			after that barrier won't show up).
 		:type maxPages: int
@@ -50,7 +50,7 @@ class IndexMannager:
 		origFilter = [(x, y) for x, y in query.getFilter().items()]
 		for k, v in query.getOrders():
 			origFilter.append(("__%s =" % k, v))
-		if query.amount:
+		if query.limit:
 			origFilter.append(("__pagesize =", self.pageSize))
 		origFilter.sort(key=lambda sx: sx[0])
 		filterKey = "".join(["%s%s" % (x, y) for x, y in origFilter])
