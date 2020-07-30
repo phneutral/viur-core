@@ -41,11 +41,12 @@ class numericBone(baseBone):
 		if value != value:  # NaN
 			return "NaN not allowed"
 
-	def singleValueFromClient(self, value, skel, name, origData):
+	def singleValueFromClient(self, value, skel, name, origData, prefix=None):
+		prefixedName = "{}.{}".format(prefix, name) if prefix else name
 		try:
 			rawValue = str(value).replace(",", ".", 1)
 		except:
-			return self.getDefaultValue(), [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, name, "Invalid Value")]
+			return self.getDefaultValue(), [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, prefixedName, "Invalid Value")]
 		else:
 			if self.precision and (str(rawValue).replace(".", "", 1).replace("-", "", 1).isdigit()) and float(
 					rawValue) >= self.min and float(rawValue) <= self.max:
@@ -54,12 +55,11 @@ class numericBone(baseBone):
 					rawValue) >= self.min and int(rawValue) <= self.max:
 				value = int(rawValue)
 			else:
-				return self.getDefaultValue(), [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, name, "Invalid Value")]
+				return self.getDefaultValue(), [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, prefixedName, "Invalid Value")]
 		err = self.isInvalid(value)
 		if err:
-			return self.getDefaultValue(), [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, name, err)]
+			return self.getDefaultValue(), [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, prefixedName, err)]
 		return value, None
-
 
 	def buildDBFilter(self, name, skel, dbFilter, rawFilter, prefix=None):
 		updatedFilter = {}

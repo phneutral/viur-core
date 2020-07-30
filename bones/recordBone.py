@@ -36,9 +36,9 @@ class recordBone(baseBone):
 		"""
 		return True
 
-	def singleValueFromClient(self, value, skel, name, origData):
+	def singleValueFromClient(self, value, skel, name, origData, prefix=None):
 		usingSkel = self.using()
-		usingSkel.fromClient(value)
+		usingSkel.fromClient(value, prefix="{}.rel".format(name))
 		return usingSkel, usingSkel.errors
 
 	def getSearchTags(self, values, key):

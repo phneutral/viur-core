@@ -987,7 +987,7 @@ class RelSkel(BaseSkeleton):
 	"""
 
 	@classmethod
-	def fromClient(cls, skelValues, data):
+	def fromClient(cls, skelValues, data, prefix=None):
 		"""
 			Reads the data supplied by data.
 			Unlike setValues, error-checking is performed.
@@ -1000,12 +1000,14 @@ class RelSkel(BaseSkeleton):
 			:type data: dict
 			:returns: True if the data was successfully read; False otherwise (eg. some required fields where missing or invalid)
 		"""
+		logging.debug("RelSkel.fromClient: %r", prefix)
 		complete = True
 		skelValues.errors = []
 		for key, _bone in skelValues.items():
 			if _bone.readOnly:
 				continue
-			errors = _bone.fromClient(skelValues, key, data)
+			errors = _bone.fromClient(skelValues, key, data, prefix=prefix)
+			logging.debug("RelSkel.fromClient: %r, %r, %r", key, prefix, errors)
 			if errors:
 				skelValues.errors.extend(errors)
 				for err in errors:

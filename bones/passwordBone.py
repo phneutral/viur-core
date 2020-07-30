@@ -17,10 +17,10 @@ from typing import List, Union
 def pbkdf2(password, salt, iterations=1001, keylen=42):
 	"""
 		An implementation of PBKDF2 (http://wikipedia.org/wiki/PBKDF2)
-		
-		Mostly based on the implementation of 
+
+		Mostly based on the implementation of
 		https://github.com/mitsuhiko/python-pbkdf2/blob/master/pbkdf2.py
-		
+
 		:copyright: (c) Copyright 2011 by Armin Ronacher.
 		:license: BSD, see LICENSE for more details.
 	"""
@@ -51,7 +51,7 @@ class passwordBone(stringBone):
 		A bone holding passwords.
 		This is always empty if read from the database.
 		If its saved, its ignored if its values is still empty.
-		If its value is not empty, its hashed (with salt) and only the resulting hash 
+		If its value is not empty, its hashed (with salt) and only the resulting hash
 		will be written to the database
 	"""
 	type = "password"
@@ -87,17 +87,18 @@ class passwordBone(stringBone):
 
 		return False
 
-	def fromClient(self, skel: 'SkeletonInstance', name: str, data: dict) -> Union[None, List[ReadFromClientError]]:
+	def fromClient(self, skel: 'SkeletonInstance', name: str, data: dict, prefix=None) -> Union[None, List[ReadFromClientError]]:
+		prefixedName = "{}.{}".format(prefix, name) if prefix else name
 		if not name in data:
-			return [ReadFromClientError(ReadFromClientErrorSeverity.NotSet, name, "Field not submitted")]
+			return [ReadFromClientError(ReadFromClientErrorSeverity.NotSet, prefixedName, "Field not submitted")]
 		value = data.get(name)
 		if not value:
 			# Password-Bone is special: As it cannot be read don't set back no None if no value is given
 			# This means an once set password can only be changed - but never deleted.
-			return [ReadFromClientError(ReadFromClientErrorSeverity.Empty, name, "No value entered")]
+			return [ReadFromClientError(ReadFromClientErrorSeverity.Empty, prefixedName, "No value entered")]
 		err = self.isInvalid(value)
 		if err:
-			return [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, name, err)]
+			return [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, prefixedName, err)]
 		skel[name] = value
 
 	def serialize(self, skel: 'SkeletonInstance', name: str, parentIndexed: bool) -> bool:

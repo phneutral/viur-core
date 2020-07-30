@@ -232,10 +232,10 @@ class baseBone(object):  # One Bone:
 		"""
 		return False
 
-	def singleValueFromClient(self, value, skel, name, origData):
+	def singleValueFromClient(self, value, skel, name, origData, prefix=None):
 		return value, None
 
-	def fromClient(self, skel: 'SkeletonInstance', name: str, data: dict) -> Union[None, List[ReadFromClientError]]:
+	def fromClient(self, skel: 'SkeletonInstance', name: str, data: dict, prefix=None) -> Union[None, List[ReadFromClientError]]:
 		"""
 			Reads a value from the client.
 			If this value is valid for this bone,
@@ -250,10 +250,12 @@ class baseBone(object):  # One Bone:
 			:type data: dict
 			:returns: None or str
 		"""
+		prefixedName = "{}.{}".format(prefix, name) if prefix else name
 		subFields = self.parseSubfieldsFromClient()
 		parsedData, fieldSubmitted = self.collectRawClientData(name, data, self.multiple, self.languages, subFields)
+		logging.debug("fromClient: %r, %r, %r, %r, %r", name, parsedData, fieldSubmitted, prefix, prefixedName)
 		if not fieldSubmitted:
-			return [ReadFromClientError(ReadFromClientErrorSeverity.NotSet, name, "Field not submitted")]
+			return [ReadFromClientError(ReadFromClientErrorSeverity.NotSet, prefixedName, "Field not submitted")]
 		errors = []
 		isEmpty = True
 		if self.languages and self.multiple:
@@ -261,9 +263,9 @@ class baseBone(object):  # One Bone:
 			for language in self.languages:
 				res[language] = []
 				if language in parsedData:
-					for singleValue in parsedData[language]:
+					for ix, singleValue in enumerate(parsedData[language]):
 						isEmpty = False
-						parsedVal, parseErrors = self.singleValueFromClient(singleValue, skel, name, data)
+						parsedVal, parseErrors = self.singleValueFromClient(singleValue, skel, name, data, "{}.{}".format(prefix, ix) if prefix else None)
 						if parsedVal is not None:
 							res[language].append(parsedVal)
 						if parseErrors:
@@ -274,28 +276,28 @@ class baseBone(object):  # One Bone:
 				res[language] = None
 				if language in parsedData:
 					isEmpty = False
-					parsedVal, parseErrors = self.singleValueFromClient(parsedData[language], skel, name, data)
+					parsedVal, parseErrors = self.singleValueFromClient(parsedData[language], skel, name, data, prefix)
 					if parsedVal is not None:
 						res[language] = parsedVal
 					if parseErrors:
 						errors.extend(parseErrors)
 		elif self.multiple:  # and not self.languages is implicit - this would have been handled above
 			res = []
-			for singleValue in parsedData:
+			for ix, singleValue in enumerate(parsedData):
 				isEmpty = False
-				parsedVal, parseErrors = self.singleValueFromClient(singleValue, skel, name, data)
+				parsedVal, parseErrors = self.singleValueFromClient(singleValue, skel, name, data, "{}.{}".format(prefix, ix) if prefix else None)
 				if parsedVal is not None:
 					res.append(parsedVal)
 				if parseErrors:
 					errors.extend(parseErrors)
 		else:  # No Languages, not multiple
 			isEmpty = not fieldSubmitted
-			res, parseErrors = self.singleValueFromClient(parsedData, skel, name, data)
+			res, parseErrors = self.singleValueFromClient(parsedData, skel, name, data, prefix)
 			if parseErrors:
 				errors.extend(parseErrors)
 		skel[name] = res
 		if isEmpty:
-			return [ReadFromClientError(ReadFromClientErrorSeverity.Empty, name, "Field not set")]
+			return [ReadFromClientError(ReadFromClientErrorSeverity.Empty, prefixedName, "Field not set")]
 		return errors or None
 
 	def isInvalid(self, value):

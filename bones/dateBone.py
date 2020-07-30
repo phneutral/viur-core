@@ -89,7 +89,7 @@ class dateBone(baseBone):
 		self.time = time
 		self.localize = localize
 
-	def singleValueFromClient(self, value, skel, name, origData):
+	def singleValueFromClient(self, value, skel, name, origData, prefix=None):
 		"""
 			Reads a value from the client.
 			If this value is valid for this bone,
@@ -104,9 +104,10 @@ class dateBone(baseBone):
 			:type data: dict
 			:returns: str or None
 		"""
+		prefixedName = "{}.{}".format(prefix, name) if prefix else name
 		rawValue = value
 		if not rawValue:
-			return None, [ReadFromClientError(ReadFromClientErrorSeverity.Empty, name, "No value selected")]
+			return None, [ReadFromClientError(ReadFromClientErrorSeverity.Empty, prefixedName, "No value selected")]
 		elif str(rawValue).replace("-", "", 1).replace(".", "", 1).isdigit():
 			if int(rawValue) < -1 * (2 ** 30) or int(rawValue) > (2 ** 31) - 2:
 				value = False  # its invalid
@@ -161,10 +162,10 @@ class dateBone(baseBone):
 			except:
 				value = False  # its invalid
 		if value is False:
-			return None, [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, name, "Invalid value entered")]
+			return None, [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, prefixedName, "Invalid value entered")]
 		err = self.isInvalid(value)
 		if err:
-			return [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, name, err)]
+			return [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, prefixedName, err)]
 		return value, None
 
 	def isInvalid(self, value):

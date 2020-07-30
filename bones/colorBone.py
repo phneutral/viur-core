@@ -13,7 +13,7 @@ class colorBone(baseBone):
 		assert mode in {"rgb", "rgba"}
 		self.mode = mode
 
-	def fromClient(self, skel: 'SkeletonInstance', name: str, data: dict) -> Union[None, List[ReadFromClientError]]:
+	def fromClient(self, skel: 'SkeletonInstance', name: str, data: dict, prefix=None) -> Union[None, List[ReadFromClientError]]:
 		"""
 			Reads a value from the client.
 			If this value is valid for this bone,
@@ -28,18 +28,19 @@ class colorBone(baseBone):
 			:type data: dict
 			:returns: str or None
 		"""
+		prefixedName = "{}.{}".format(prefix, name) if prefix else name
 		if not name in data:
-			return [ReadFromClientError(ReadFromClientErrorSeverity.NotSet, name, "Field not submitted")]
+			return [ReadFromClientError(ReadFromClientErrorSeverity.NotSet, prefixedName, "Field not submitted")]
 		value = data[name]
 		if not value:
 			skel[name] = None
-			return [ReadFromClientError(ReadFromClientErrorSeverity.Empty, name, "No value selected")]
+			return [ReadFromClientError(ReadFromClientErrorSeverity.Empty, prefixedName, "No value selected")]
 		value = value.lower()
 		if value.count("#") > 1:
-			return [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, name, "Invalid value entered")]
+			return [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, prefixedName, "Invalid value entered")]
 		for char in value:
 			if not char in "#0123456789abcdef":
-				return [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, name, "Invalid value entered")]
+				return [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, prefixedName, "Invalid value entered")]
 		if self.mode == "rgb":
 			if len(value) == 3:
 				value = "#" + value
@@ -49,14 +50,14 @@ class colorBone(baseBone):
 				if len(value) == 6:
 					value = "#" + value
 			else:
-				return [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, name, "Invalid value entered")]
+				return [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, prefixedName, "Invalid value entered")]
 		if self.mode == "rgba":
 			if len(value) == 8 or len(value) == 9:
 				if len(value) == 8:
 					value = "#" + value
 			else:
-				return [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, name, "Invalid value entered")]
+				return [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, prefixedName, "Invalid value entered")]
 		err = self.isInvalid(value)
 		if err:
-			return [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, name, err)]
+			return [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, prefixedName, err)]
 		skel[name] = value

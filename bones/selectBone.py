@@ -50,14 +50,15 @@ class selectBone(baseBone):
 		elif isinstance(values, OrderedDict):
 			self.values = values
 
-	def singleValueFromClient(self, value, skel, name, origData):
+	def singleValueFromClient(self, value, skel, name, origData, prefix=None):
+		prefixedName = "{}.{}".format(prefix, name) if prefix else name
+		logging.debug("SelectBone.singleValueFromClient: %r, %r, %r, %r", name, origData, prefix, prefixedName)
 		if not str(value):
-			return None, [ReadFromClientError(ReadFromClientErrorSeverity.Empty, name, "No value selected")]
+			return None, [ReadFromClientError(ReadFromClientErrorSeverity.Empty, prefixedName, "No value selected")]
 		for key in self.values.keys():
 			if str(key) == str(value):
 				return key, None
-		return None, [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, name, "Invalid value selected")]
-
+		return None, [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, prefixedName, "Invalid value selected")]
 
 	def buildDBFilter__(self, name, skel, dbFilter, rawFilter, prefix=None):
 		"""

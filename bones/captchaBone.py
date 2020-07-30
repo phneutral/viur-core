@@ -26,7 +26,7 @@ class captchaBone(bone.baseBone):
 		skel.accessedValues[name] = self.publicKey
 		return True
 
-	def fromClient(self, skel: 'SkeletonInstance', name: str, data: dict) -> Union[None, List[ReadFromClientError]]:
+	def fromClient(self, skel: 'SkeletonInstance', name: str, data: dict, prefix=None) -> Union[None, List[ReadFromClientError]]:
 		"""
 			Reads a value from the client.
 			If this value is valid for this bone,

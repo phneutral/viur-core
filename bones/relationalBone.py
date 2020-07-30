@@ -375,7 +375,8 @@ class relationalBone(baseBone):
 	def parseSubfieldsFromClient(self):
 		return self.using is not None
 
-	def singleValueFromClient(self, value, skel, name, origData):
+	def singleValueFromClient(self, value, skel, name, origData, prefix=None):
+		prefixedName = "{}.{}".format(prefix, name) if prefix else name
 		oldValues = skel[name]
 		def restoreSkels(key, usingData, index=None):
 			refSkel, usingSkel = self._getSkels()
@@ -410,14 +411,15 @@ class relationalBone(baseBone):
 			else:
 				if index:
 					errors.append(
-						ReadFromClientError(ReadFromClientErrorSeverity.Invalid, "%s.%s" % (name, index),
+						ReadFromClientError(ReadFromClientErrorSeverity.Invalid, "%s.%s" % (prefixedName, index),
 											"Invalid value submitted"))
 				else:
 					errors.append(
-						ReadFromClientError(ReadFromClientErrorSeverity.Invalid, name, "Invalid value submitted"))
+						ReadFromClientError(ReadFromClientErrorSeverity.Invalid, prefixedName, "Invalid value submitted"))
+				logging.debug("before leaving to early?")
 				return None, None, errors  # We could not parse this
 			if usingSkel:
-				if not usingSkel.fromClient(usingData):
+				if not usingSkel.fromClient(usingData, prefix="{0}.rel".format(name)):
 					errors.extend(usingSkel.errors)
 			return refSkel, usingSkel, errors
 		if self.using and isinstance(value, dict):
@@ -428,9 +430,10 @@ class relationalBone(baseBone):
 			destKey = value
 			usingData = None
 		if not destKey:  # Allow setting this bone back to empty
-			return None, [ReadFromClientError(ReadFromClientErrorSeverity.Empty, name, "No value submitted")]
+			return None, [ReadFromClientError(ReadFromClientErrorSeverity.Empty, prefixedName, "No value submitted")]
 		assert isinstance(destKey, str)
 		refSkel, usingSkel, errors = restoreSkels(destKey, usingData)
+		logging.debug("restoreSkels result: %r", errors)
 		if refSkel:
 			return {"dest": refSkel, "rel": usingSkel}, errors
 		else:

@@ -232,12 +232,13 @@ class textBone(baseBone):
 	def singleValueSerialize(self, value, skel: 'SkeletonInstance', name: str, parentIndexed: bool):
 		return value
 
-	def singleValueFromClient(self, value, skel, name, origData):
+	def singleValueFromClient(self, value, skel, name, origData, prefix=None):
+		prefixedName = "{}.{}".format(prefix, name) if prefix else name
 		err = self.isInvalid(value)  # Returns None on success, error-str otherwise
 		if not err:
 			return HtmlSerializer(self.validHtml).sanitize(value), None
 		else:
-			return None, [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, name, err)]
+			return None, [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, prefixedName, err)]
 
 	def isInvalid(self, value):
 		"""

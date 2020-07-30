@@ -81,11 +81,15 @@ class stringBone(baseBone):
 		else:
 			return ""
 
-	def singleValueFromClient(self, value, skel, name, origData):
+	def singleValueFromClient(self, value, skel, name, origData, prefix=None):
+		prefixedName = "{}.{}".format(prefix, name) if prefix else name
+		logging.debug("singleValueFromClient: %r, %r, %r, %r", value, skel, name, origData)
+		if not value and self.required:
+			return value, [ReadFromClientError(ReadFromClientErrorSeverity.Empty, prefixedName, "Value is empty")]
 		err = self.isInvalid(value)
 		if not err:
 			return utils.escapeString(value), None
-		return self.getDefaultValue(), [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, name, err)]
+		return self.getDefaultValue(), [ReadFromClientError(ReadFromClientErrorSeverity.Invalid, prefixedName, err)]
 
 	def buildDBFilter(self, name, skel, dbFilter, rawFilter, prefix=None):
 		if not name in rawFilter and not any(
