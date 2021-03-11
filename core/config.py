@@ -113,7 +113,8 @@ conf = {
 			'img-src': ['self', '*.ggpht.com', '*.googleusercontent.com'],  # Serving-URLs of file-Bones will point here
 			'script-src': ['self'],
 			# Required to login with google:
-			'frame-src': ['self', 'www.google.com', 'drive.google.com', 'accounts.google.com']
+			'frame-src': ['self', 'www.google.com', 'drive.google.com', 'accounts.google.com'],
+			'require-trusted-types-for': ['script']
 		}
 	},
 	# Per default, we'll emit Referrer-Policy: strict-origin so no referrers leak to external services
