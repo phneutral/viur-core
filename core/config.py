@@ -108,13 +108,13 @@ conf = {
 	# If set, viur will emit a CSP http-header with each request. Use security.addCspRule to set this property
 	"viur.security.contentSecurityPolicy": {
 		'enforce': {
-			'style-src': ['self', 'unsafe-inline'],  # unsafe-inline currently required for textBones
+			'style-src': ['self'],
 			'default-src': ['self'],
 			'img-src': ['self', '*.ggpht.com', '*.googleusercontent.com'],  # Serving-URLs of file-Bones will point here
 			'script-src': ['self'],
 			# Required to login with google:
 			'frame-src': ['self', 'www.google.com', 'drive.google.com', 'accounts.google.com'],
-			'require-trusted-types-for': ['script']
+			'form-action': ['self']
 		}
 	},
 	# Per default, we'll emit Referrer-Policy: strict-origin so no referrers leak to external services
@@ -134,7 +134,7 @@ conf = {
 		"usb": [],
 	},
 	# Shall we emit Cross-Origin-Embedder-Policy: require-corp?
-	"viur.security.enableCOEP": True,
+	"viur.security.enableCOEP": False,
 	# Emit a Cross-Origin-Opener-Policy Header? Valid values are same-origin|same-origin-allow-popups|unsafe-none
 	"viur.security.enableCOOP": "same-origin",
 	# Emit a Cross-Origin-Resource-Policy Header? Valid values are same-site|same-origin|cross-origin
@@ -149,6 +149,8 @@ conf = {
 	"viur.security.xContentTypeOptions": True,
 	# Unless set to logical none; ViUR will emit a X-Permitted-Cross-Domain-Policies with each request
 	"viur.security.xPermittedCrossDomainPolicies": "none",
+	# The default sitekey and secret to use for the captcha-bone. If set, must be a dictionary of "sitekey" and "secret"
+	"viur.security.captcha.defaultCredentials": None,
 
 	# Default is 60 minutes lifetime for ViUR sessions
 	"viur.session.lifeTime": 60 * 60,
